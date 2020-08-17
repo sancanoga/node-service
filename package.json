@@ -1,0 +1,16 @@
+{
+  "name": "node-service",
+  "version": "1.0.0",
+  "description": "service example",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "sancanoga",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mocha": "^8.1.0",
+    "supertest": "^4.0.2"
+  }
+}
