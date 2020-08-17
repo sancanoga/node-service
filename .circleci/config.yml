@@ -14,14 +14,14 @@ jobs:
       - run: npm run test
 
       - run:
-        name: Install Vercel
-        command: sudo npm i -g vercel
+          name: Install Vercel
+          command: sudo npm i -g vercel
       
       - run:
-        name: Run Vercel
-        command: URL=$(vercel --public -t PVsACss8tjYdHe6fDLqyVDHH)
+          name: Run Vercel
+          command: URL=$(vercel --public -t PVsACss8tjYdHe6fDLqyVDHH)
       
       - run:
-        name: Smoke Test
-        command: curl --silent -L $URL
+          name: Smoke Test
+          command: curl --silent -L $URL
 
