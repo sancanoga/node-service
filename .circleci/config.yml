@@ -12,13 +12,19 @@ jobs:
           steps:
             - run: npm install
       - run: npm run test
-
+  
+  deploy:
+    executor:
+      name: node/default
+      tag: '10.4'
+    steps:
+      - checkout
       - run:
           name: Install Vercel
           command: sudo npm i -g vercel
       
       - run:
-          name: Run Vercel
+          name: Deploy App in Vercel
           command: |
             URL=$(vercel --public -t PVsACss8tjYdHe6fDLqyVDHH --confirm)
             curl --silent -L $URL
