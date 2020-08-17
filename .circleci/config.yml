@@ -19,9 +19,6 @@ jobs:
       
       - run:
           name: Run Vercel
-          command: URL=$(vercel --public -t PVsACss8tjYdHe6fDLqyVDHH --confirm)
-      
-      - run:
-          name: Smoke Test
-          command: curl --silent -L $URL
-
+          command: |
+            URL=$(vercel --public -t PVsACss8tjYdHe6fDLqyVDHH --confirm)
+            curl --silent -L $URL
