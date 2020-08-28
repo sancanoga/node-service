@@ -8,7 +8,7 @@ jobs:
       - run: npm install
       - run: npm run test
   
-  deploy:
+  deploy_qa:
     docker:
       - image: circleci/node:10.22.0
     steps:
@@ -16,18 +16,76 @@ jobs:
       - run:
           name: Install Vercel
           command: sudo npm i -g vercel
-      
       - run:
           name: Deploy App in Vercel
           command: |
-            URL=$(vercel --public -t PVsACss8tjYdHe6fDLqyVDHH --confirm)
+            URL=$(vercel --public -t $VERCEL_TOKEN --confirm)
             curl --silent -L $URL
 
+  build_snapshot:
+    docker:
+      - image: hashicorp/packer:1.6.1
+    steps:
+      - checkout
+      - run:
+          name: Build Snapshot
+          command: packer build deployments/template.json
+
+  deploy_prod:
+    docker:
+      - image: circleci/node:10.22.0
+    working_directory: ~/node-service/infra
+    steps:
+      - checkout:
+          path: ~/node-service
+      - run:
+          name: Set Variables Terraform
+          command: |
+            TF_VAR_image_id=$(curl -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $DIGITALOCEAN_API_TOKEN" "https://api.digitalocean.com/v2/images?private=true" | jq ."images[] | select(.name == \"$CIRCLE_BUILD_NUM\") | .id")
+      - run:
+          name: Install Terraform
+          command: |
+            wget -O /tmp/terraform.zip https://releases.hashicorp.com/terraform/0.13.1/terraform_0.13.1_linux_amd64.zip?_ga=2.42370918.2146529047.1522086131-369822613.1522086131
+            sudo unzip /tmp/terraform.zip -d /bin
+      - run:
+          name: Terraform Init
+          command: terraform init
+      - run:
+          name: Deploy App and Infra Prod
+          command: terraform apply --auto-approve
+      - persist_to_workspace:
+          root: /root/node-service
+          paths: infra/
+
+  destroy:
+    docker:
+      - image: hashicorp/terraform:0.13.1
+    working_directory: ~/node-service/infra
+    steps:
+      - attach_workspace:
+          at: /root/node-service
+      - run:
+          name: Deploy App and Infra Prod
+          command: terraform destroy --auto-approve
+  
 workflows:
   version: 2
   build_and_deploy:
     jobs:
       - build
-      - deploy:
+      - deploy_qa:
           requires:
             - build
+      - build_snapshot:
+          requires:
+            - build
+      - deploy_prod:
+          requires:
+            - build_snapshot
+      - manual_approve:
+          type: approval
+          requires:
+            - deploy_prod
+      - destroy:
+          requires:
+            - manual_approve
