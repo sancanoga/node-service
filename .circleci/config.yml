@@ -41,7 +41,7 @@ jobs:
       - run:
           name: Set Variables Terraform
           command: |
-            TF_VAR_image_id=$(curl -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $DIGITALOCEAN_API_TOKEN" "https://api.digitalocean.com/v2/images?private=true" | jq ."images[] | select(.name == \"$CIRCLE_BUILD_NUM\") | .id")
+            echo 'export TF_VAR_image_id=$(curl -X GET -H "Content-Type: application/json" -H "Authorization: Bearer $DIGITALOCEAN_API_TOKEN" "https://api.digitalocean.com/v2/images?private=true" | jq ."images[] | select(.name == \"$CIRCLE_BUILD_NUM\") | .id")' >> $BASH_ENV
       - run:
           name: Install Terraform
           command: |
