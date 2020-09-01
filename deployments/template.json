@@ -1,13 +1,18 @@
-{ "builders": [
+{
+  "variables": {
+      "build_number": "{{env `CIRCLE_BUILD_NUM`}}"
+  },
+  "builders": [
     {
         "type": "digitalocean",
         "image": "coreos-stable",
         "region": "nyc3",
         "size": "1gb",
+        "snapshot_name": "node-service-{{user `build_number`}}",
         "ssh_username": "core"
     }
-],
-"provisioners": [
+  ],
+  "provisioners": [
     {
         "type": "shell",
         "inline": [
